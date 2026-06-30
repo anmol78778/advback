@@ -3,12 +3,13 @@ import dotenv from "dotenv"
 import connectDb from "./lib/db.js"
 import User from "./model/user.model.js"
 import Redis from "ioredis"
+import ratelimiter from "./middleware/ratelimit.js"
 dotenv.config()
 
 const app=express()
 const port = process.env.PORT || 5000
 
-const redis=new Redis(process.env.REDIS_URL)
+export const redis=new Redis(process.env.REDIS_URL)
 app.use(express.json())
 
 app.get('/',(req,res)=>{
@@ -30,7 +31,7 @@ app.post("/create", async (req, res) => {
     return res.json(user)
 })
 
-app.get("/get",async (req, res) => {
+app.get("/get",ratelimiter,async (req, res) => {
 
     const user = await User.find({})
 
